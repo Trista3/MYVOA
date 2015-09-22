@@ -1,0 +1,66 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:umadsdk="http://schemas.android.com/apk/res/com.LoveBus"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+    
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="33dp"
+        >
+        
+        <TextView
+            android:id="@+id/study"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="学习"
+            android:textSize="17dp"/>
+        
+         <TextView
+            android:id="@+id/culture"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="文蕴"
+            android:textSize="17dp"/>
+         
+          <TextView
+            android:id="@+id/record"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="离线"
+            android:textSize="17dp"/>
+        
+    </LinearLayout>
+    
+     <ImageView
+            android:id="@+id/cursor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="matrix"
+            android:textSize="22dp"
+            android:src="@drawable/line"/>
+    
+     <FrameLayout 
+         android:id="@+id/fragmentContainer"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent">
+          
+        <android.support.v4.view.ViewPager
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center" 
+        android:layout_weight="1"
+        android:persistentDrawingCache="animation"/> 
+        
+     </FrameLayout>
+     
+</LinearLayout><!-- From: file:/E:/Geek/studioProject/MYVOA/mYVOA/src/main/res/layout/activity_main.xml -->

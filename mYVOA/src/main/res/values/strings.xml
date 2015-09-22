@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">MYVOA</string>
+    <string name="action_settings">Settings</string>
+    <string name="study">学习</string>
+    <string name="culture">文蕴</string>
+    <string name="record">离线</string>
+    <string name="text_view">您还没有浏览记录</string>
+
+</resources>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/textWebview"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" 
+    android:orientation="vertical">
+
+    <WebView
+        android:id="@+id/textShow"
+        android:layout_width="match_parent"
+        android:layout_height="0dp" 
+        android:layout_weight="1"/>
+
+    <LinearLayout
+        android:visibility="invisible"
+        android:id="@+id/play_linear"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:background="#ffffff"
+        android:orientation="horizontal" >
+
+        <SeekBar
+            android:id="@+id/seekbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:thumb="@drawable/shixinxiaoyuandian" />
+
+        <TextView
+            android:id="@+id/play"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:background="@drawable/right" />
+    </LinearLayout>
+
+
+</LinearLayout>
