@@ -3,7 +3,7 @@ package com.tryhard.myvoa.db;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
-import com.tryhard.myvoa.datatype.InformationItem;
+import com.tryhard.myvoa.bean.InformationItem;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -14,7 +14,7 @@ import android.graphics.BitmapFactory;
 
 public class InformationItemManager {
 
-	// ´´½¨ÌõÄ¿ÐÅÏ¢Êý¾Ý¿â
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½Ï¢ï¿½ï¿½Ý¿ï¿½
 	private DBopenHelper dbOpenHelper;
 	private String mTableName; 
 
@@ -25,7 +25,7 @@ public class InformationItemManager {
 		
 	}
 
-	// ±£´æÒ»ÌõÌõÄ¿ÐÅÏ¢
+	// ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½Ï¢
 	public void save(InformationItem informationItem) {
 
 		if (find(informationItem.getId()) != null)
@@ -46,7 +46,7 @@ public class InformationItemManager {
 						informationItem.getWebsite(), os.toByteArray() });
 	}
 
-	// ¸üÐÂÒ»ÌõÌõÄ¿ÐÅÏ¢
+	// ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½Ï¢
 	public void update(InformationItem informationItem) {
 		if(null == find(informationItem.getId()))
 			return;
@@ -62,7 +62,7 @@ public class InformationItemManager {
 		//db.execSQL("update " + mTableName + " set bitmap=" + os.toByteArray() + " where _id=" + Integer.valueOf(key));
 	}
 
-	// ²éÑ¯ÌõÄ¿ÐÅÏ¢
+	// ï¿½ï¿½Ñ¯ï¿½ï¿½Ä¿ï¿½ï¿½Ï¢
 	public ArrayList<InformationItem> findAll() {
 		SQLiteDatabase db = dbOpenHelper.getReadableDatabase();
 		Cursor cursor = db.rawQuery("SELECT * FROM " + mTableName + " order by _id DESC", null);
@@ -84,13 +84,13 @@ public class InformationItemManager {
 		return items;
 	}
 
-	// ¸ù¾Ý²ÎÊýËù¸øµÄ¹Ø¼ü×Ö£¬²éÕÒ±íÖÐµÄ¼ÇÂ¼
+	// ï¿½ï¿½Ý²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¹Ø¼ï¿½ï¿½Ö£ï¿½ï¿½ï¿½ï¿½Ò±ï¿½ï¿½ÐµÄ¼ï¿½Â¼
 	public InformationItem find(Integer key) {
 		SQLiteDatabase db = dbOpenHelper.getReadableDatabase();
 		Cursor cursor = db.rawQuery("SELECT * FROM " + mTableName + " WHERE _id = " + key, null);
 		InformationItem informationItem = null;
 		cursor.moveToFirst();
-		// Èç¹ûµÃµ½µÄÓÐÐ§µÄÐÐ£¬ÔòÉú³É¶ÔÓ¦µÄRemindingRecord¼ÇÂ¼
+		// ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½É¶ï¿½Ó¦ï¿½ï¿½RemindingRecordï¿½ï¿½Â¼
 		if (!cursor.isAfterLast()) {
 
 			int id = cursor.getInt(cursor.getColumnIndex("_id"));

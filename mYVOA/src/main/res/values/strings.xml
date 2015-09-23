@@ -7,5 +7,8 @@
     <string name="culture">文蕴</string>
     <string name="record">离线</string>
     <string name="text_view">您还没有浏览记录</string>
+    <string name="title_activity_base">BaseActivity</string>
+
+    <string name="hello_world">Hello world!</string>
 
 </resources>
