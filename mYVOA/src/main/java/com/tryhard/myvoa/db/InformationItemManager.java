@@ -14,7 +14,7 @@ import android.graphics.BitmapFactory;
 
 public class InformationItemManager {
 
-	// ������Ŀ��Ϣ��ݿ�
+	// 创建条目信息数据库
 	private DBopenHelper dbOpenHelper;
 	private String mTableName; 
 
@@ -25,7 +25,7 @@ public class InformationItemManager {
 		
 	}
 
-	// ����һ����Ŀ��Ϣ
+	// 保存一条条目信息
 	public void save(InformationItem informationItem) {
 
 		if (find(informationItem.getId()) != null)
@@ -35,34 +35,39 @@ public class InformationItemManager {
 		String key = website.substring(website.length() - 10, website.length() - 5);
 		SQLiteDatabase db = dbOpenHelper.getWritableDatabase();
 		Bitmap bitmap = informationItem.getBitmap();
+		Boolean isScaned = informationItem.getIsScaned();
 
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		if (null != bitmap) {
 			bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
 		}
 	
-		db.execSQL("insert into " + mTableName + "(_id,title,date,website,bitmap) values(?,?,?,?,?)",
+		db.execSQL("insert into " + mTableName + " (_id,title,date,website,scan,bitmap) values(?,?,?,?,?,?)",
 				new Object[] { Integer.valueOf(key), informationItem.getTitle(), informationItem.getDate(),
-						informationItem.getWebsite(), os.toByteArray() });
+						informationItem.getWebsite(),isScaned.toString(), os.toByteArray() });
 	}
 
-	// ����һ����Ŀ��Ϣ
+	// 更新一条条目信息
 	public void update(InformationItem informationItem) {
 		if(null == find(informationItem.getId()))
 			return;
+		Boolean isScaned = informationItem.getIsScaned();
 		Bitmap  bitmap = informationItem.getBitmap();
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
+		ContentValues values = new ContentValues();
+		if(bitmap != null){
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
+			values.put("bitmap", os.toByteArray());
+		}
 		SQLiteDatabase db = dbOpenHelper.getWritableDatabase();
 		String website = informationItem.getWebsite();
 		String key = website.substring(website.length() - 10, website.length() - 5);
-		ContentValues values = new ContentValues();
-		values.put("bitmap", os.toByteArray());
+		values.put("scan", isScaned.toString());
 		db.update(mTableName, values, "_id=?", new String[]{Integer.valueOf(key).toString()});
 		//db.execSQL("update " + mTableName + " set bitmap=" + os.toByteArray() + " where _id=" + Integer.valueOf(key));
 	}
 
-	// ��ѯ��Ŀ��Ϣ
+	// 查询条目信息
 	public ArrayList<InformationItem> findAll() {
 		SQLiteDatabase db = dbOpenHelper.getReadableDatabase();
 		Cursor cursor = db.rawQuery("SELECT * FROM " + mTableName + " order by _id DESC", null);
@@ -73,9 +78,11 @@ public class InformationItemManager {
 			String title = cursor.getString(1);
 			String date = cursor.getString(2);
 			String website = cursor.getString(3);
-			byte[] bitmapByte = cursor.getBlob(4);
+			Boolean isScaned = Boolean.valueOf(cursor.getString(4));
+			byte[] bitmapByte = cursor.getBlob(5);
 			Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapByte, 0, bitmapByte.length);
 			InformationItem informationItem = new InformationItem(id, title, date, website, bitmap);
+			informationItem.setIsScaned(isScaned);
 			items.add(informationItem);
 		}
 
@@ -84,22 +91,23 @@ public class InformationItemManager {
 		return items;
 	}
 
-	// ��ݲ������Ĺؼ��֣����ұ��еļ�¼
+	// 根据参数所给的关键字，查找表中的记录
 	public InformationItem find(Integer key) {
 		SQLiteDatabase db = dbOpenHelper.getReadableDatabase();
 		Cursor cursor = db.rawQuery("SELECT * FROM " + mTableName + " WHERE _id = " + key, null);
 		InformationItem informationItem = null;
 		cursor.moveToFirst();
-		// ���õ�����Ч���У�����ɶ�Ӧ��RemindingRecord��¼
+		// 如果得到的有效的行，则生成对应的RemindingRecord记录
 		if (!cursor.isAfterLast()) {
-
 			int id = cursor.getInt(cursor.getColumnIndex("_id"));
 			String title = cursor.getString(1);
 			String date = cursor.getString(2);
 			String website = cursor.getString(3);
-			byte[] bitmapByte = cursor.getBlob(4);
+			Boolean isScaned = Boolean.valueOf(cursor.getString(4));
+			byte[] bitmapByte = cursor.getBlob(5);
 			Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapByte, 0, bitmapByte.length, null);
 			informationItem = new InformationItem(id, title, date, website, bitmap);
+			informationItem.setIsScaned(isScaned);
 		}
 		cursor.close();
 		db.close();

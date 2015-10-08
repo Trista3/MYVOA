@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.tryhard.myvoa"
-        minSdkVersion 8
+        minSdkVersion 13
         targetSdkVersion 21
     }
 
@@ -24,4 +24,12 @@ dependencies {
     compile project(':pullToRefreshViewPager')
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile files('libs/jsoup-1.8.2.jar')
+
+    compile 'com.ogaclejapan.smarttablayout:library:1.4.2@aar'
+
+    //Optional: see how to use the utility.
+    compile 'com.ogaclejapan.smarttablayout:utils-v4:1.4.2@aar'
+
+    //Optional: see how to use the utility.
+  //  compile 'com.ogaclejapan.smarttablayout:utils-v13:1.4.2@aar'
 }

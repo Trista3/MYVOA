@@ -2,8 +2,9 @@
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.tryhard.myvoa.ui.activity.base.BaseActivity">
-    <item android:id="@+id/action_settings"
-          android:title="@string/action_settings"
+    <item android:id="@+id/share"
+          android:title="@string/share"
           android:orderInCategory="100"
-          app:showAsAction="never"/>
+          app:icon="@drawable/share"
+          app:showAsAction="always|withText"/>
 </menu>

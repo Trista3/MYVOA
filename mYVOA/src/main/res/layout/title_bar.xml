@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+    <LinearLayout
+        android:orientation="horizontal" android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/titlebarBackup"
+        android:background="@drawable/press_selector"
+        >
+    <ImageView
+        android:id="@+id/titleBackUpImage"
+        android:layout_gravity="center"
+        android:layout_width="24dp"
+        android:layout_height="match_parent"
+        />
+
+    <TextView
+        android:text="@string/app_name"
+        android:id="@+id/titleTextView"
+        android:maxWidth="240dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFFFF"
+        android:textSize="18dp"
+        android:paddingRight="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_gravity="center_vertical" />
+</LinearLayout>
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"/>
+
+    <ImageView
+        android:id="@+id/moreMenuImage"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        />
+
+</LinearLayout>

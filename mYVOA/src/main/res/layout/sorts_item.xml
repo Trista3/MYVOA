@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:touchscreenBlocksFocus="true"
+    android:background="@drawable/press_list_item_selector">
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/relative"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        >
+
+        <TextView
+            android:id="@+id/Etitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20dp"
+            android:textColor="#5E5D5D"/>
+
+        <TextView
+            android:id="@+id/Ctitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/Etitle"
+            android:textSize="17dp"
+            android:textColor="#5E5D5D"/>
+
+        <com.tryhard.myvoa.widget.DrawView
+            android:id="@+id/drawView"
+            android:layout_width="13dp"
+            android:layout_alignParentRight="true"
+            android:layout_height="50dp"/>
+
+
+    </RelativeLayout>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#D9D6D6"/>
+</LinearLayout>

@@ -12,8 +12,16 @@ public class InformationItem implements Serializable {
 	private String mWebsite;
 	private Integer mId;
 	private Bitmap mBitmap;
-	
-	
+	Boolean isScaned = false;
+
+	public Boolean getIsScaned() {
+		return isScaned;
+	}
+
+	public void setIsScaned(Boolean isScaned) {
+		this.isScaned = isScaned;
+	}
+
 	public InformationItem(int id,String title,String date,String website,Bitmap bitmap){
 		mId = id;
 		mTitle = title;

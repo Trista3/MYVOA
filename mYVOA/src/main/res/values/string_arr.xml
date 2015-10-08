@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="study_array_english">
+        <item>Biligual News</item>
+        <item>Learn A Word</item>
+        <item>Words And Idioms</item>
+        <item>American English Mosaic</item>
+        <item>Go English</item>
+        <item>Wordmaster</item>
+        <item>America Cafe</item>
+        <item>Intermediate American English</item>
+        <item>English in a Minute</item>
+        <item>How to Say it</item>
+        <item>President\'s Address</item>
+        <item>Popular American</item>
+        <item>Business Etiquette</item>
+        <item>Sport English</item>
+    </string-array>
+
+    <string-array name="study_array_chinese">
+        <item>双语新闻</item>
+        <item>学个词</item>
+        <item>美国习惯用语</item>
+        <item>美语训练班</item>
+        <item>美语三级跳</item>
+        <item>词汇大师</item>
+        <item>美语咖啡屋</item>
+        <item>中级美国英语</item>
+        <item>一分钟英语</item>
+        <item>美语怎么说</item>
+        <item>美国总统演说</item>
+        <item>流行美语</item>
+        <item>商务礼节美语</item>
+        <item>体育美语</item>
+    </string-array>
+
+    <string-array name="study_website">
+        <item>/Bilingual_News_1.html</item>
+        <item>/Learn_A_Word_1.html</item>
+        <item>/Words_And_Idioms_1.html</item>
+        <item>/American_English_Mosaic_1.html</item>
+        <item>/Go_English_1.html</item>
+        <item>/Word_Master_1.html</item>
+        <item>/American_Cafe_1.html</item>
+        <item>/Intermediate_American_English_1.html</item>
+        <item>/English_in_a_Minute_1.html</item>
+        <item>/How_American_English_1.html</item>
+        <item>/President_Address_1.html</item>
+        <item>/Popular_American_1.html</item>
+        <item>/Business_Etiquette_1.html</item>
+        <item>/Sports_English_1.html</item>
+    </string-array>
+
+    <string-array name="culture_array_english">
+        <item>Technology Report</item>
+        <item>This is America</item>
+        <item>Agriculture Report</item>
+        <item>Science in the News</item>
+        <item>Health Report</item>
+        <item>Explorations</item>
+        <item>Education Report</item>
+        <item>The Making of a Nation</item>
+        <item>Economics Report</item>
+        <item>American Mosaic</item>
+        <item>In the News</item>
+        <item>American Stories</item>
+        <item>Words And Their Stories</item>
+        <item>People in America</item>
+        <item>AS IT IS</item>
+    </string-array>
+
+    <string-array name="culture_array_chinese">
+        <item>科技报道</item>
+        <item>今日美国</item>
+        <item>农业报道</item>
+        <item>科学报道</item>
+        <item>健康报道</item>
+        <item>自然探索</item>
+        <item>教育报道</item>
+        <item>建国史话</item>
+        <item>经济报道</item>
+        <item>美国万花筒</item>
+        <item>时事新闻</item>
+        <item>美国故事</item>
+        <item>词汇掌故</item>
+        <item>美国人物志</item>
+        <item>慢速新闻杂志</item>
+    </string-array>
+
+    <string-array name="culture_website">
+        <item>/Technology_Report_1.html</item>
+        <item>/This_is_America_1.html</item>
+        <item>/Agriculture_Report_1.html</item>
+        <item>/Science_in_the_News_1.html</item>
+        <item>/Health_Report_1.html</item>
+        <item>/Explorations_1.html</item>
+        <item>/Education_Report_1.html</item>
+        <item>/The_Making_of_a_Nation_1.html</item>
+        <item>/Economics_Report_1.html</item>
+        <item>/American_Mosaic_1.html</item>
+        <item>/In_the_News_1.html</item>
+        <item>/American_Stories_1.html</item>
+        <item>/Words_And_Their_Stories_1.html</item>
+        <item>/People_in_America_1.html</item>
+        <item>/as_it_is_1.html</item>
+    </string-array>
+
+</resources>
