@@ -9,6 +9,7 @@ import com.tryhard.myvoa.bean.InformationItem;
 import com.tryhard.myvoa.db.DBopenHelper;
 import com.tryhard.myvoa.db.InformationItemManager;
 import com.tryhard.myvoa.ui.activity.ArticleContentActivity;
+import com.tryhard.myvoa.ui.activity.ListOfArticleSimpleActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -16,11 +17,13 @@ import android.os.Bundle;
 import android.content.Context;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 public class BrowsingHistoryFragment extends ListFragment {
@@ -31,6 +34,11 @@ public class BrowsingHistoryFragment extends ListFragment {
 	public DBopenHelper dbOpenHelper;
 	public static MyInformationAdapter adapter;
 	private Context mContext;
+	private PopupMenu popupMenu; // 菜单对象
+
+
+	//视图组件
+	private ImageView mMoreMenu; //菜单图标
 
 	//常量
 	public static InformationItemManager mItemDBmanager,recordFragmentDBmanager;
@@ -39,17 +47,17 @@ public class BrowsingHistoryFragment extends ListFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 							 Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.browsing_history_fragment, container, false);
-		initView(v);
 		initLgObj();
+		initView(v);
 
 		setListAdapter(adapter);
-
 		return v;
 	}
 
 	private void initView(View v){
 		ListView view = (ListView)v.findViewById(android.R.id.list);
 		view.setEmptyView(v.findViewById(android.R.id.empty));
+
 	}
 
 	private void initLgObj(){
@@ -75,12 +83,7 @@ public class BrowsingHistoryFragment extends ListFragment {
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		InformationItem item = mInformations.get(position);
 
-		HashMap<String, Object> passValue = new HashMap<String, Object>();
-		passValue.put("websiteT", item.getWebsite());
-		passValue.put("titleName", item.getTitle());
-		Intent intent = new Intent(mContext,ArticleContentActivity.class);
-		intent.putExtra(ArticleContentActivity.CONTENT_WEBSITE, passValue);  //传入外层条目website
-		startActivity(intent);
+		startActivity(ListOfArticleSimpleActivity.makeIntent(mContext, item));
 	}
 
 

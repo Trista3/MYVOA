@@ -1,10 +1,12 @@
 package com.tryhard.myvoa.ui.activity;
 
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.NavUtils;
 import android.view.Window;
 
 import com.tryhard.myvoa.R;
@@ -26,6 +28,7 @@ public abstract class ArticleListSimpleActivity extends BaseActivity {
 		        	fragment =  createFragment();
 		        	fm.beginTransaction().add(R.id.innerFragContainer, fragment).commit();
 		        }
+
 		 }
 
 		

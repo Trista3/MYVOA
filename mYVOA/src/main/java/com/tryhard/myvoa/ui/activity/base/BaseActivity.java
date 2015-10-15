@@ -25,17 +25,14 @@ public class BaseActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //设置自定义标题栏
-        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+   //     requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         setContentView(R.layout.activity_base);
-        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title_bar);
-
+   //     getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title_bar);
+        getActionBar().show();
         super.onCreate(savedInstanceState);
 
     }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
-    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -105,4 +105,21 @@
         <item>/as_it_is_1.html</item>
     </string-array>
 
+    <integer-array name="color">
+        <item>0xFFFF0000</item>
+        <item>0xFF00FF00</item>
+        <item>0xFF0000FF</item>
+        <item>0xFFAA0033</item>
+        <item>0xFF3300AA</item>
+        <item>0xFF30AA03</item>
+        <item>0xFF9900EE</item>
+        <item>0xFFEE0099</item>
+        <item>0xFF00FFFF</item>
+        <item>0xFFBB5522</item>
+        <item>0xFF1122FF</item>
+        <item>0xFFFFFF00</item>
+        <item>0xFFDD4411</item>
+        <item>0xFF11DD44</item>
+    </integer-array>
+
 </resources>

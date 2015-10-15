@@ -16,7 +16,8 @@ public class InformationItemManager {
 
 	// 创建条目信息数据库
 	private DBopenHelper dbOpenHelper;
-	private String mTableName; 
+	private String mTableName;
+	static int column = 0;
 
 	public InformationItemManager(Context context, String tableName) {
 
@@ -42,9 +43,9 @@ public class InformationItemManager {
 			bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
 		}
 	
-		db.execSQL("insert into " + mTableName + " (_id,title,date,website,scan,bitmap) values(?,?,?,?,?,?)",
+		db.execSQL("insert into " + mTableName + " (_id,title,date,website,scan,bitmap,column) values(?,?,?,?,?,?,?)",
 				new Object[] { Integer.valueOf(key), informationItem.getTitle(), informationItem.getDate(),
-						informationItem.getWebsite(),isScaned.toString(), os.toByteArray() });
+						informationItem.getWebsite(),isScaned.toString(), os.toByteArray(),column++});
 	}
 
 	// 更新一条条目信息
@@ -70,7 +71,7 @@ public class InformationItemManager {
 	// 查询条目信息
 	public ArrayList<InformationItem> findAll() {
 		SQLiteDatabase db = dbOpenHelper.getReadableDatabase();
-		Cursor cursor = db.rawQuery("SELECT * FROM " + mTableName + " order by _id DESC", null);
+		Cursor cursor = db.rawQuery("SELECT * FROM " + mTableName + " order by column ", null);
 		ArrayList<InformationItem> items = new ArrayList<InformationItem>();
 		
 		while (cursor.moveToNext()) {

@@ -9,6 +9,7 @@
     <string name="text_view">您还没有浏览记录</string>
     <string name="title_activity_base">BaseActivity</string>
     <string name="share">分享</string>
+    <string name="footer_text">查看更多</string>
 
     <string name="hello_world">Hello world!</string>
 

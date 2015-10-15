@@ -4,159 +4,191 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.handmark.pulltorefresh.library.PullToRefreshBase;
-import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
-import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.tryhard.myvoa.R;
+import com.tryhard.myvoa.bean.Information;
 import com.tryhard.myvoa.bean.InformationItem;
 import com.tryhard.myvoa.db.InformationItemManager;
-import com.tryhard.myvoa.ui.activity.ArticleContentActivity;
-import com.tryhard.myvoa.ui.activity.MainActivity;
+import com.tryhard.myvoa.ui.activity.ListOfArticleSimpleActivity;
+import com.tryhard.myvoa.widget.DividerItemDecoration;
+import com.tryhard.myvoa.widget.ListOfArticleFragAdapter;
 
-import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NavUtils;
-import android.text.format.DateUtils;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
+
 
 public class ListOfArticleFragment extends Fragment {
 	//常量
 	private static final String TAG = "ListOfArticleFragment";
 	public static final String INNER_WEBSITE = "website";
 	public static final String WEBSITE_HEAD = "http://www.51voa.com";
+	private static final int getMoreWebsite = 2;
+	private static final int initList = 1;
+	private static final int getMore = 3;
 
 	//数据型变量
 	private ArrayList<InformationItem> mInformationItems = null;
+	private List<InformationItem> mInformationItems2 = null;
 	private String innerWebsite; // 网址
 	private String mTableName;
+	private Information information;
+	private int lastVisibleItem;
+	private List<String> websites;
 
 	//视图组件
-	private PullToRefreshListView mPullToRefreshListView;
-	private ListView actualListView;
+	private SwipeRefreshLayout mSwipeRefreshWidget;
+	private RecyclerView mRecyclerView;
+	private LinearLayoutManager mLayoutManager;
 
 	//逻辑对象
-	private MyInformationAdapter adapter;
+	private ListOfArticleFragAdapter adapter;
 	private Context mContext;
-	private InformationItemManager mItemDBmanager1,recordFragmentDBmanager;//数据库的管理
-	private HashMap<String, Object> getPassedValue;
+	private InformationItemManager mItemDBmanager1, recordFragmentDBmanager;//数据库的管理
+	private Boolean isFirst = true;
+	private Handler firstHandler;
+	private int scanWebsiteNum = 0;
 
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		initTitleBar(); //初始化标题栏
 		initLgObj();
 		mInformationItems = mItemDBmanager1.findAll();
+
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.article_list_fragment, container, false);
-		initView(v);
 
-		if(mInformationItems.isEmpty()){
-			new GetDataTask().execute();
+		//设置标题栏题目
+		getActivity().getActionBar().setTitle(information.getCtitle());
+
+		//启动返回上一级菜单
+		if (NavUtils.getParentActivityName(getActivity()) != null) {
+			getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
 		}
-		actualListView.setAdapter(adapter);
-		viewSetListener();
+
+		//首次启动页面，自动加载数据
+		if(mInformationItems.isEmpty())
+		     new GetDataTask(innerWebsite, initList).execute();
+
+		//获取同一类型的网页的所有也输得网址
+		new GetDataTask(innerWebsite, getMoreWebsite).execute();
+
+		//初始化fragment的视图
+		initView(v);
 		return v;
 	}
 
-	//初始化标题栏
-	private void initTitleBar(){
-		if(NavUtils.getParentActivityName(getActivity()) != null){
-			ImageView imageView = (ImageView)getActivity().getWindow().findViewById(R.id.titleBackUpImage);
-			imageView.setBackgroundResource(R.drawable.fanhui);
-			View backup = getActivity().getWindow().findViewById(R.id.titlebarBackup);
-			backup.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					NavUtils.navigateUpFromSameTask(getActivity());
+
+	private void initView(View v) {
+		mSwipeRefreshWidget = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh_widget);
+		mRecyclerView = (RecyclerView) v.findViewById(android.R.id.list);
+
+		//为RecyclerView设置Adapter
+		mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+		adapter = new ListOfArticleFragAdapter(mInformationItems);
+		//为RecyclerView中的项设置点击监听事件
+		adapter.setOnItemClickListener(new ListOfArticleFragAdapter.OnItemClickLitener() {
+			@Override
+			public void onItemClick(View view, int position) {
+				//点击过的条目字体变色
+				InformationItem item = mInformationItems.get(position);
+				TextView title = (TextView) view.findViewById(R.id.culture_titleView);
+				TextView date = (TextView) view.findViewById(R.id.culture_dateView);
+				title.setTextColor(getResources().getColor(R.color.c001));
+				date.setTextColor(getResources().getColor(R.color.c001));
+
+				recordFragmentDBmanager.save(mInformationItems.get(position));//将浏览记录加到“离线”里面
+
+				startActivity(ListOfArticleSimpleActivity.makeIntent(mContext, item));
+			}
+		});
+		mRecyclerView.setAdapter(adapter);
+
+		//给SwipeRefreshLayout设置进度条颜色和监听器
+		mSwipeRefreshWidget.setColorSchemeResources(R.color.c5, R.color.c2,
+				R.color.c3, R.color.c4);
+		mSwipeRefreshWidget.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+			@Override
+			public void onRefresh() {
+				new GetDataTask(innerWebsite,initList).execute();
+			}
+		});
+
+		//设置滑到页面底部时上拉监听事件
+		mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+			@Override
+			public void onScrollStateChanged(int newState) {
+				//		super.onScrollStateChanged(newState);
+				if (newState == RecyclerView.SCROLL_STATE_IDLE
+						&& lastVisibleItem + 1 == adapter.getItemCount()) {
+					mSwipeRefreshWidget.setRefreshing(true);
+					if(scanWebsiteNum < websites.size()) {
+						new GetDataTask(WEBSITE_HEAD + "/" + websites.get(++scanWebsiteNum), getMore).execute();
+					}else{
+						mSwipeRefreshWidget.setRefreshing(false);
+					}
 				}
-			});
+			}
+			@Override
+			public void onScrolled(int dx, int dy) {
+				//		super.onScrolled(dx, dy);
+				lastVisibleItem = mLayoutManager.findLastVisibleItemPosition();
+			}
+		});
+
+		mRecyclerView.setHasFixedSize(true);
+		mLayoutManager = new LinearLayoutManager(mContext);
+		mRecyclerView.setLayoutManager(mLayoutManager);
+		if(!mInformationItems.isEmpty()) {
+			mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(),
+					DividerItemDecoration.VERTICAL_LIST));
 		}
-
-		getPassedValue = (HashMap<String, Object>) getActivity().getIntent().getSerializableExtra(MainActivity.INNER_WEBSITE);
-		innerWebsite = (String) getPassedValue.get("websiteT");
-		mTableName = innerWebsite.substring(innerWebsite.lastIndexOf("/") + 1, innerWebsite.lastIndexOf("."));
-
-		TextView textView = (TextView)getActivity().getWindow().findViewById(R.id.titleTextView);
-		textView.setText((String) getPassedValue.get("titleName"));
-
 	}
 
-	private void initView(View v){
-		//下拉列表初始化
-		mPullToRefreshListView = (PullToRefreshListView) v.findViewById(R.id.pull_refresh_list);
-		actualListView = mPullToRefreshListView.getRefreshableView();
-	}
-
-	private void initLgObj(){
+	private void initLgObj() {
 		mContext = getActivity();
+		information = (Information) getActivity().getIntent().getSerializableExtra(ListOfArticleSimpleActivity.extra_data);
+		innerWebsite = information.getWebsite();
+		mTableName = innerWebsite.substring(innerWebsite.lastIndexOf("/") + 1, innerWebsite.lastIndexOf("."));
 		mItemDBmanager1 = new InformationItemManager(mContext, mTableName);
 		recordFragmentDBmanager = BrowsingHistoryFragment.recordFragmentDBmanager;
-		adapter = new MyInformationAdapter();
+		websites = new ArrayList<String>();
+		mInformationItems2 = new ArrayList<InformationItem>();
 	}
 
-	private void viewSetListener(){
-		mPullToRefreshListView.setMode(PullToRefreshListView.Mode.BOTH);
-		//下拉监听
-		mPullToRefreshListView.setOnRefreshListener(new OnRefreshListener<ListView>() {
-			@Override
-			public void onRefresh(PullToRefreshBase<ListView> refreshView) {
-				String label = DateUtils.formatDateTime(mContext.getApplicationContext(),
-						System.currentTimeMillis(), DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE
-								| DateUtils.FORMAT_ABBREV_ALL);
-
-				//更新最新刷新时间
-				refreshView.getLoadingLayoutProxy().setLastUpdatedLabel(label);
-
-				//启动异步任务链接网址，解析网页内容
-				new GetDataTask().execute();
-			}
-		});
-		//设置列表条目点击监听事件：点击后，启动TextContentActivity，获取解析的新闻内容
-		mPullToRefreshListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				InformationItem item = mInformationItems.get(position - 1);
-
-				new GetDataTask2(item).execute();
-				HashMap<String, Object> passValue = new HashMap<String, Object>();
-				passValue.put("websiteT", item.getWebsite());
-				passValue.put("titleName", item.getTitle());
-				Intent intent = new Intent(mContext,ArticleContentActivity.class);
-				intent.putExtra(ArticleContentActivity.CONTENT_WEBSITE, passValue);  //传入外层条目website
-				startActivity(intent);
-			}
-		});
-	}
-
+	//获取网页数据的异步任务
 	private class GetDataTask extends AsyncTask<Void, Void, String> {
-
-
+		String website;
+		int type;
+		public GetDataTask(String website, int getContentType){
+			this.website = website;
+			type = getContentType;
+		}
 		@Override
 		protected void onPreExecute() {
 			// TODO Auto-generated method stub
@@ -166,40 +198,67 @@ public class ListOfArticleFragment extends Fragment {
 
 		@Override
 		protected String doInBackground(Void... params) {
-			getContent();
+			getContent(website,type);
 			return "OK";
 		}
 
 		@Override
 		protected void onPostExecute(String result) {
-			mInformationItems = mItemDBmanager1.findAll();
+			if(type == getMore){
+				mInformationItems.addAll(mInformationItems2);
+			}else{
+				mInformationItems = mItemDBmanager1.findAll();
+			}
+			mSwipeRefreshWidget.setRefreshing(false);
+			adapter.updateInfoItemList(mInformationItems);
 			adapter.notifyDataSetChanged();
-			mPullToRefreshListView.onRefreshComplete();
+			mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(),
+					DividerItemDecoration.VERTICAL_LIST));
 			super.onPostExecute(result);
 		}
 	}
 
 	//解析网页内容
-	private boolean getContent() {
+	private boolean getContent(String websiteOut, int getContentType) {
 		try {
 			//连接网页
-			Document doc = Jsoup.connect(innerWebsite).get();
-			Element content = doc.getElementById("list");
-			Elements list = content.getElementsByTag("li");
-			//开始解析
-			for (org.jsoup.nodes.Element j : list) {
-				InformationItem infoItem = new InformationItem();
+			Document doc = Jsoup.connect(websiteOut).get();
 
-				Elements i = j.getElementsByTag("a");
-				String text = j.text();
-				infoItem.setDate(text.substring(text.lastIndexOf("(") + 1, text.lastIndexOf(")")));
-				infoItem.setTitle(text.substring(0, text.lastIndexOf("(")));
-				infoItem.setWebsite(i.attr("href"));
-				String website = infoItem.getWebsite();
+			switch(getContentType){
+				case getMore:
+				case initList: {
+					Element content = doc.getElementById("list");
+					Elements contentlist = content.getElementsByTag("li");
 
-				String key = website.substring(website.length() - 10, website.length() - 5);
-				infoItem.setId(Integer.parseInt(key));
-				mItemDBmanager1.save(infoItem);
+					//开始解析
+					for (org.jsoup.nodes.Element j : contentlist) {
+						InformationItem infoItem = new InformationItem();
+
+						Elements i = j.getElementsByTag("a");
+						String text = j.text();
+						infoItem.setDate(text.substring(text.lastIndexOf("(") + 1, text.lastIndexOf(")")));
+						infoItem.setTitle(text.substring(0, text.lastIndexOf("(")));
+						infoItem.setWebsite(i.attr("href"));
+						String website = infoItem.getWebsite();
+
+						String key = website.substring(website.length() - 10, website.length() - 5);
+						infoItem.setId(Integer.parseInt(key));
+						if(getContentType == getMore){
+							mInformationItems2.add(infoItem);
+						}else {
+							mItemDBmanager1.save(infoItem);
+						}
+					}
+					break;
+				}
+				case getMoreWebsite: {
+					Element contentWeb = doc.getElementById("pagelist");
+					Elements websitesList = contentWeb.getElementsByTag("a");
+					for (org.jsoup.nodes.Element j : websitesList) {
+						websites.add(j.attr("href"));
+					}
+					break;
+				}
 			}
 			return true;
 		} catch (IOException e) {
@@ -214,11 +273,11 @@ public class ListOfArticleFragment extends Fragment {
 
 		private String website;
 		Bitmap bitmap = null;
-		InformationItem infoItem;
+		int position;
 
-		GetDataTask2(InformationItem infoItem) {
-			this.website = WEBSITE_HEAD + infoItem.getWebsite();
-			this.infoItem = infoItem;
+		GetDataTask2(int position) {
+			this.website = WEBSITE_HEAD + mInformationItems.get(position).getWebsite();
+			this.position = position;
 		}
 
 		@Override
@@ -229,12 +288,13 @@ public class ListOfArticleFragment extends Fragment {
 
 		@Override
 		protected void onPostExecute(Bitmap result) {
-			infoItem.setIsScaned(true);
-			if(bitmap!=null){
-				infoItem.setBitmap(bitmap);
+			mInformationItems.get(position).setIsScaned(true);
+			if (bitmap != null) {
+				mInformationItems.get(position).setBitmap(bitmap);
 			}
-			mItemDBmanager1.update(infoItem);
-			recordFragmentDBmanager.save(infoItem);//将浏览记录加到“离线”里面
+			mItemDBmanager1.update(mInformationItems.get(position));
+			recordFragmentDBmanager.save(mInformationItems.get(position));//将浏览记录加到“离线”里面
+			adapter.updateInfoItemList(mInformationItems);
 			adapter.notifyDataSetChanged();
 			super.onPostExecute(bitmap);
 		}
@@ -263,51 +323,13 @@ public class ListOfArticleFragment extends Fragment {
 			e.printStackTrace();
 			Log.e(TAG, "doc error");
 
-		}finally{
+		} finally {
 			return bitmap;
 		}
 	}
 
-	private class MyInformationAdapter extends ArrayAdapter<InformationItem> {
-		public MyInformationAdapter() {
-			super(mContext, 0);
-		}
-
-		@Override
-		public int getCount() {
-			Log.i(TAG, "The item num is: " + mInformationItems.size());
-			return mInformationItems.size();
-		}
-
-		@SuppressLint("InflateParams")
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-
-			if (convertView == null) {
-				convertView = getActivity().getLayoutInflater().inflate(R.layout.article_list_item, null);
-			}
-
-			InformationItem infoItem = mInformationItems.get(position);
-
-			ImageView imageView = (ImageView) convertView.findViewById(R.id.photo);
-			if(null == infoItem.getBitmap()){
-				imageView.setImageBitmap(null);
-			}else{
-				imageView.setImageBitmap(infoItem.getBitmap());
-			}
-			TextView title = (TextView) convertView.findViewById(R.id.culture_titleView);
-			title.setText(infoItem.getTitle());
-			TextView date = (TextView) convertView.findViewById(R.id.culture_dateView);
-			date.setText(infoItem.getDate());
-			if(infoItem.getIsScaned()){
-				title.setTextColor(0xFF898787);
-				date.setTextColor(0xFF898787);
-			}
-
-			return convertView;
-		}
-	}
 }
+
 
 
 

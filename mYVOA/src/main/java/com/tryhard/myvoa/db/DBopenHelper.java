@@ -19,7 +19,7 @@ public class DBopenHelper extends SQLiteOpenHelper {
 	}
 
 	public void onMyCreate(SQLiteDatabase db,String tableName) {
-		db.execSQL("create table " + tableName +"(_id integer primary key,title varchar(500),date varchar(20),website varchar(500),scan varchar(20),bitmap blob)");
+		db.execSQL("create table " + tableName +"(_id integer primary key,title varchar(500),date varchar(20),website varchar(500),scan varchar(20),bitmap blob,column int)");
 	}
 	
 	@Override

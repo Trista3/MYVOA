@@ -53,16 +53,10 @@ public class SortOfCultureFragment extends ListFragment {
 	//数据型变量
 	private List<Information> mInformations; //装载列表条目
 
-	private int[] colorIds3 = new int[]{
-			0xFFFF0000, 0xFF00FF00, 0xFF0000FF,
-			0xFFAA0033, 0xFF3300AA, 0xFF30AA03,
-			0xFF9900EE, 0xFFEE0099, 0xFF00FFFF,
-			0xFFBB5522, 0xFF1122FF, 0xFFFFFF00,
-			0xFFDD4411, 0xFF11DD44
-	};
+	private int[] color; //小圆心颜色
 	//逻辑对象
 	public DBopenHelper dbOpenHelper;
-	private Context appContext;
+	private Context mContext;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -88,8 +82,8 @@ public class SortOfCultureFragment extends ListFragment {
 	private void initLObj(){
 		listFragmentadapter = new MyInformationAdapter((ArrayList<Information>)mInformations);
 		setListAdapter(listFragmentadapter);
-		appContext = getActivity();
-		dbOpenHelper = new DBopenHelper(appContext);
+		mContext = getActivity();
+		dbOpenHelper = new DBopenHelper(mContext);
 	}
 	
 	private void initInformationList(){
@@ -97,6 +91,7 @@ public class SortOfCultureFragment extends ListFragment {
 		String[] eTitle = res.getStringArray(R.array.culture_array_english);
 		String[] cTitle = res.getStringArray(R.array.culture_array_chinese);
 		String[] website = res.getStringArray(R.array.culture_website);
+		color = res.getIntArray(R.array.color);
 		mInformations = new ArrayList<Information>();
 		
 		for(int i=0;i < eTitle.length;i++){
@@ -131,7 +126,7 @@ public class SortOfCultureFragment extends ListFragment {
 			Resources res = getResources();
 
 			DrawView drawView = (DrawView)convertView.findViewById(R.id.drawView);
-			drawView.setColor(colorIds3[position % 14]);
+			drawView.setColor(color[position % 14]);
 
 			return convertView;
 		}
@@ -153,11 +148,7 @@ public class SortOfCultureFragment extends ListFragment {
 			info.isBuildTable = true;
 			sharedPrefer.save(info.isBuildTable);
 		}
-		HashMap<String, Object> passValue = new HashMap<String, Object>();
-		passValue.put("websiteT", info.getWebsite());
-		passValue.put("titleName", info.getCtitle());
-		Intent intent = new Intent(getActivity(),ListOfArticleSimpleActivity.class);
-		intent.putExtra(MainActivity.INNER_WEBSITE, passValue);  //传入外层条目website
-		startActivity(intent);
+
+		startActivity(MainActivity.makeIntent(mContext, info));
 	}
 }

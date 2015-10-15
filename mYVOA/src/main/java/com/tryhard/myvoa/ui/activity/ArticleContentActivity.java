@@ -34,6 +34,7 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
+import com.tryhard.myvoa.bean.InformationItem;
 import com.tryhard.myvoa.ui.activity.base.BaseActivity;
 import com.tryhard.myvoa.ui.fragment.ListOfArticleFragment;
 import com.tryhard.myvoa.R;
@@ -42,10 +43,12 @@ public class ArticleContentActivity extends BaseActivity {
     // 常量
     private static final String TAG = "myvoa-->CultureTextContentActivity";
     public static final String CONTENT_WEBSITE = "contentWebsite";
+    public static String content_extra_data="ArticleContentActivity.extra_data";
 
     // 数据型变量
     private String mTextWebsite;
     private String mp3UriString = "noMP3";
+    private InformationItem informationItem;
 
     // 视图组件
     private LinearLayout mLinearLayout;
@@ -65,6 +68,9 @@ public class ArticleContentActivity extends BaseActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.article_content_activity);
+        if(NavUtils.getParentActivityName(this) != null) {
+           getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
        initTitleView();
 
@@ -75,54 +81,23 @@ public class ArticleContentActivity extends BaseActivity {
     //初始化标题栏
     @TargetApi(Build.VERSION_CODES.KITKAT)
     private void initTitleView(){
-        getPassedValue = (HashMap<String, Object>)getIntent().getSerializableExtra(CONTENT_WEBSITE);
-        mTextWebsite =  ListOfArticleFragment.WEBSITE_HEAD + (String) getPassedValue.get("websiteT");
-
-        TextView textView = (TextView)getWindow().findViewById(R.id.titleTextView);
-        textView.setText((String) getPassedValue.get("titleName"));
-        // mWebView.getSettings().setJavaScriptEnabled(true);
-        if(NavUtils.getParentActivityName(this) != null){
-            ImageView imageView = (ImageView)getWindow().findViewById(R.id.titleBackUpImage);
-            imageView.setBackgroundResource(R.drawable.fanhui);
-            View backup = getWindow().findViewById(R.id.titlebarBackup);
-            backup.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    ArticleContentActivity.this.finish();
-                }
-            });
-        }
-        //更多菜单
-        mMoreMenu = (ImageView)findViewById(R.id.moreMenuImage);
-        mMoreMenu.setBackgroundResource(R.drawable.gengduo);
-        mMoreMenu.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                popupMenu.show();
-            }
-        });
-        popupMenu = new PopupMenu(this, mMoreMenu);
-        popupMenu.getMenuInflater().inflate(R.menu.menu_base, popupMenu.getMenu()); // 绑定菜单的视图
-        popupMenu.getMenu().findItem(R.id.share).setIcon(R.drawable.share);
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() { // 设置监听器
-            public boolean onMenuItemClick(MenuItem item) {
-
-                return true;
-            }
-        });
-        try {
-            Field field = popupMenu.getClass().getDeclaredField("android.widget.PopupMenu.mPopup");
-            field.setAccessible(true);
-            MenuPopupHelper mHelper = (MenuPopupHelper) field.get(popupMenu);
-            mHelper.setForceShowIcon(true);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
-        }
+        informationItem = (InformationItem)getIntent().getSerializableExtra(ArticleContentActivity.content_extra_data);
+        mTextWebsite = ListOfArticleFragment.WEBSITE_HEAD + informationItem.getWebsite();
+        getActionBar().setTitle(informationItem.getTitle());
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                this.finish();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     //enable为true时，菜单添加图标有效，enable为false时无效。4.0系统默认无效

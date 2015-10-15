@@ -1,16 +1,19 @@
 package com.tryhard.myvoa.ui.fragment;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.tryhard.myvoa.bean.InformationItem;
 import com.tryhard.myvoa.util.PreferencesManager;
 import com.tryhard.myvoa.R;
 import com.tryhard.myvoa.bean.Information;
 import com.tryhard.myvoa.db.DBopenHelper;
 import com.tryhard.myvoa.ui.activity.ListOfArticleSimpleActivity;
 import com.tryhard.myvoa.ui.activity.MainActivity;
+import com.tryhard.myvoa.widget.DividerItemDecoration;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -20,9 +23,11 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.Shape;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +36,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 public class SortOfStudyFragment extends ListFragment {
     //常量
@@ -47,6 +57,7 @@ public class SortOfStudyFragment extends ListFragment {
     //逻辑对象
     public DBopenHelper dbOpenHelper;
     private Context mContext;
+    private List<String> websites;
     //视图组件
     private MyInformationAdapter adapter;
 
@@ -115,7 +126,6 @@ public class SortOfStudyFragment extends ListFragment {
             Resources res = getResources();
             View shapeImage = (View) convertView.findViewById(R.id.drawView);
             GradientDrawable shapeDrawable = (GradientDrawable)res.getDrawable(R.drawable.rectangle);
-       //     shapeImage.setBackground(shapeDrawable);
             shapeImage.setBackgroundColor(res.getColor(colorIds[position % 14]));
             return convertView;
         }
@@ -139,14 +149,8 @@ public class SortOfStudyFragment extends ListFragment {
             info.isBuildTable = true;
             sharedPrefer.save(info.isBuildTable);
         }
-        HashMap<String, Object> passValue = new HashMap<String, Object>();
-        passValue.put("websiteT", info.getWebsite());
-        passValue.put("titleName", info.getCtitle());
-        Intent intent = new Intent(getActivity(),ListOfArticleSimpleActivity.class);
-        intent.putExtra(MainActivity.INNER_WEBSITE, passValue);  //传入外层条目website
-        startActivity(intent);
 
+        startActivity(MainActivity.makeIntent(mContext, info));
     }
-
 
 }
