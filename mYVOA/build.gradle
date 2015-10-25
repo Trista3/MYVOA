@@ -30,4 +30,6 @@ dependencies {
     //Optional: see how to use the utility.
     //  compile 'com.ogaclejapan.smarttablayout:utils-v13:1.4.2@aar'
     compile files('libs/lib-recyclerview.jar')
+    compile files('libs/ormlite-android-4.48.jar')
+    compile files('libs/ormlite-core-4.48.jar')
 }

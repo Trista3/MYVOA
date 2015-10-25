@@ -1,43 +1,27 @@
 package com.tryhard.myvoa.ui.fragment;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.tryhard.myvoa.util.PreferencesManager;
 import com.tryhard.myvoa.R;
 import com.tryhard.myvoa.bean.Information;
-import com.tryhard.myvoa.db.DBopenHelper;
-import com.tryhard.myvoa.ui.activity.ListOfArticleSimpleActivity;
 import com.tryhard.myvoa.ui.activity.MainActivity;
 import com.tryhard.myvoa.widget.DrawView;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import static android.widget.RelativeLayout.ALIGN_PARENT_RIGHT;
 
 public class SortOfCultureFragment extends ListFragment {
 	//常量
@@ -55,7 +39,6 @@ public class SortOfCultureFragment extends ListFragment {
 
 	private int[] color; //小圆心颜色
 	//逻辑对象
-	public DBopenHelper dbOpenHelper;
 	private Context mContext;
 
 	@Override
@@ -83,7 +66,6 @@ public class SortOfCultureFragment extends ListFragment {
 		listFragmentadapter = new MyInformationAdapter((ArrayList<Information>)mInformations);
 		setListAdapter(listFragmentadapter);
 		mContext = getActivity();
-		dbOpenHelper = new DBopenHelper(mContext);
 	}
 	
 	private void initInformationList(){
@@ -136,19 +118,6 @@ public class SortOfCultureFragment extends ListFragment {
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Information info = mInformations.get(position);
-		//取某列表的设置
-		PreferencesManager sharedPrefer = new PreferencesManager(getActivity(),info.getEtitle());
-		Map<String,String> params = sharedPrefer.getPreferences();
-		info.isBuildTable = Boolean.getBoolean(params.get(info.getEtitle()));//检测是否建立数据库表
-		String website = info.getWebsite();
-
-		if(params.get(info.getEtitle()) == "false")
-		{
-			dbOpenHelper.onMyCreate(dbOpenHelper.getWritableDatabase(), website.substring(website.lastIndexOf("/")+1,website.lastIndexOf(".")));
-			info.isBuildTable = true;
-			sharedPrefer.save(info.isBuildTable);
-		}
-
 		startActivity(MainActivity.makeIntent(mContext, info));
 	}
 }

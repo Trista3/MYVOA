@@ -1,5 +1,6 @@
 package com.tryhard.myvoa.ui.fragment;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -12,9 +13,10 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.tryhard.myvoa.R;
+import com.tryhard.myvoa.bean.BrowsingItem;
 import com.tryhard.myvoa.bean.Information;
 import com.tryhard.myvoa.bean.InformationItem;
-import com.tryhard.myvoa.db.InformationItemManager;
+import com.tryhard.myvoa.db.InformationItemDao;
 import com.tryhard.myvoa.ui.activity.ListOfArticleSimpleActivity;
 import com.tryhard.myvoa.widget.DividerItemDecoration;
 import com.tryhard.myvoa.widget.ListOfArticleFragAdapter;
@@ -32,7 +34,6 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,6 +57,7 @@ public class ListOfArticleFragment extends Fragment {
 	private Information information;
 	private int lastVisibleItem;
 	private List<String> websites;
+	private String mSortOfInformation;
 
 	//视图组件
 	private SwipeRefreshLayout mSwipeRefreshWidget;
@@ -65,7 +67,7 @@ public class ListOfArticleFragment extends Fragment {
 	//逻辑对象
 	private ListOfArticleFragAdapter adapter;
 	private Context mContext;
-	private InformationItemManager mItemDBmanager1, recordFragmentDBmanager;//数据库的管理
+	private InformationItemDao mInformationItemDao;//数据库的管理
 	private Boolean isFirst = true;
 	private Handler firstHandler;
 	private int scanWebsiteNum = 0;
@@ -75,7 +77,7 @@ public class ListOfArticleFragment extends Fragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		initLgObj();
-		mInformationItems = mItemDBmanager1.findAll();
+		mInformationItems = mInformationItemDao.getAllItemsByInfoSort(mSortOfInformation);
 
 	}
 
@@ -122,9 +124,16 @@ public class ListOfArticleFragment extends Fragment {
 				title.setTextColor(getResources().getColor(R.color.c001));
 				date.setTextColor(getResources().getColor(R.color.c001));
 
-				recordFragmentDBmanager.save(mInformationItems.get(position));//将浏览记录加到“离线”里面
+				BrowsingItem browsingItem = new BrowsingItem();
+				browsingItem.setmTitle(item.getTitle());
+				browsingItem.setmDate(item.getDate());
+				browsingItem.setmWebsite(item.getWebsite());
+				browsingItem.setmBitmapOs(item.getBitmapOs());
+			//	BrowsingHistoryFragment.mBrowsingItemDao.add(browsingItem);//将浏览记录加到“离线”里面
 
 				startActivity(ListOfArticleSimpleActivity.makeIntent(mContext, item));
+
+				new GetDataTask2(position).execute();
 			}
 		});
 		mRecyclerView.setAdapter(adapter);
@@ -174,9 +183,9 @@ public class ListOfArticleFragment extends Fragment {
 		mContext = getActivity();
 		information = (Information) getActivity().getIntent().getSerializableExtra(ListOfArticleSimpleActivity.extra_data);
 		innerWebsite = information.getWebsite();
+		mSortOfInformation = information.getEtitle();
 		mTableName = innerWebsite.substring(innerWebsite.lastIndexOf("/") + 1, innerWebsite.lastIndexOf("."));
-		mItemDBmanager1 = new InformationItemManager(mContext, mTableName);
-		recordFragmentDBmanager = BrowsingHistoryFragment.recordFragmentDBmanager;
+		mInformationItemDao = new InformationItemDao(getActivity());
 		websites = new ArrayList<String>();
 		mInformationItems2 = new ArrayList<InformationItem>();
 	}
@@ -207,7 +216,7 @@ public class ListOfArticleFragment extends Fragment {
 			if(type == getMore){
 				mInformationItems.addAll(mInformationItems2);
 			}else{
-				mInformationItems = mItemDBmanager1.findAll();
+				mInformationItems = mInformationItemDao.getAllItemsByInfoSort(mSortOfInformation);
 			}
 			mSwipeRefreshWidget.setRefreshing(false);
 			adapter.updateInfoItemList(mInformationItems);
@@ -239,14 +248,12 @@ public class ListOfArticleFragment extends Fragment {
 						infoItem.setDate(text.substring(text.lastIndexOf("(") + 1, text.lastIndexOf(")")));
 						infoItem.setTitle(text.substring(0, text.lastIndexOf("(")));
 						infoItem.setWebsite(i.attr("href"));
-						String website = infoItem.getWebsite();
+						infoItem.setmFromSortOfInformation(mSortOfInformation);
 
-						String key = website.substring(website.length() - 10, website.length() - 5);
-						infoItem.setId(Integer.parseInt(key));
 						if(getContentType == getMore){
 							mInformationItems2.add(infoItem);
 						}else {
-							mItemDBmanager1.save(infoItem);
+							mInformationItemDao.add(infoItem);
 						}
 					}
 					break;
@@ -288,12 +295,24 @@ public class ListOfArticleFragment extends Fragment {
 
 		@Override
 		protected void onPostExecute(Bitmap result) {
-			mInformationItems.get(position).setIsScaned(true);
+			InformationItem item = mInformationItems.get(position);
+			item.setIsScaned(true);
 			if (bitmap != null) {
-				mInformationItems.get(position).setBitmap(bitmap);
+				ByteArrayOutputStream os = new ByteArrayOutputStream();
+					bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
+				item.setBitmapOs(os.toByteArray());
+			}else{
+				item.setBitmapOs(null);
 			}
-			mItemDBmanager1.update(mInformationItems.get(position));
-			recordFragmentDBmanager.save(mInformationItems.get(position));//将浏览记录加到“离线”里面
+			mInformationItemDao.updateItem(item);
+
+			BrowsingItem browsingItem = new BrowsingItem();
+			browsingItem.setmTitle(item.getTitle());
+			browsingItem.setmDate(item.getDate());
+			browsingItem.setmWebsite(item.getWebsite());
+			browsingItem.setmBitmapOs(item.getBitmapOs());
+			BrowsingHistoryFragment.mBrowsingItemDao.add(browsingItem);//将浏览记录加到“离线”里面
+
 			adapter.updateInfoItemList(mInformationItems);
 			adapter.notifyDataSetChanged();
 			super.onPostExecute(bitmap);
