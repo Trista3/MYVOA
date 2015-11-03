@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 
+
 public class MainActivity extends BaseActivity {
     //常量
     public static final String INNER_WEBSITE = "website";
@@ -46,6 +47,7 @@ public class MainActivity extends BaseActivity {
         mViewPager.setAdapter(adapter);
         mViewPager.setCurrentItem(0);
         viewPagerTab = (SmartTabLayout) findViewById(R.id.viewpagertab);
+
         viewPagerTab.setViewPager(mViewPager);
     }
 

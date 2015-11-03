@@ -19,17 +19,20 @@ android {
 }
 
 dependencies {
-    compile project(':library')
-    compile project(':pullToRefreshListFragment')
-    compile project(':pullToRefreshViewPager')
     compile 'com.android.support:appcompat-v7:21.0.3'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile files('libs/jsoup-1.8.2.jar')
     compile 'com.ogaclejapan.smarttablayout:library:1.4.2@aar'
-    //Optional: see how to use the utility.
     compile 'com.ogaclejapan.smarttablayout:utils-v4:1.4.2@aar'
-    //Optional: see how to use the utility.
-    //  compile 'com.ogaclejapan.smarttablayout:utils-v13:1.4.2@aar'
-    compile files('libs/lib-recyclerview.jar')
     compile files('libs/ormlite-android-4.48.jar')
     compile files('libs/ormlite-core-4.48.jar')
+    compile files('libs/lib-recyclerview.jar')
+
+    compile "com.android.support:support-v4:22.2.1"
+
+    compile 'io.reactivex:rxjava:1.0.10'
+
+    compile 'io.reactivex:rxandroid:1.0.1'
+
+    compile 'com.squareup.retrofit:retrofit:1.9.0'
 }

@@ -78,7 +78,7 @@ public class SortOfStudyFragment extends ListFragment {
             Information information = new Information();
             information.setCtitle(cTitle[i]);
             information.setEtitle(eTitle[i]);
-            information.setWebsite(WEBSITE + website[i]);
+            information.setWebsite( website[i]);
             mInformations.add(information);
         }
     }
