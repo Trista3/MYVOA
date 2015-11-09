@@ -2,9 +2,7 @@ package com.tryhard.myvoa.ui.fragment;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import com.tryhard.myvoa.util.PreferencesManager;
 import com.tryhard.myvoa.R;
 import com.tryhard.myvoa.bean.Information;
 import com.tryhard.myvoa.ui.activity.MainActivity;
@@ -80,7 +78,7 @@ public class SortOfCultureFragment extends ListFragment {
 			Information information = new Information();
 			information.setCtitle(cTitle[i]);
 			information.setEtitle(eTitle[i]);
-			information.setWebsite(WEBSITE_HEAD + website[i]);
+			information.setWebsite( website[i]);
 			mInformations.add(information);
 		}
 		

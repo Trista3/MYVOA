@@ -36,6 +36,7 @@
             android:name=".ui.activity.base.BaseActivity"
             android:label="@string/title_activity_base" >
         </activity>
+        <service android:name=".util.ArticleVideoPlayService"></service>
     </application>
     <uses-sdk
         android:minSdkVersion="13"

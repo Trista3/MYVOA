@@ -3,6 +3,7 @@ package com.tryhard.myvoa.util;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import com.tryhard.myvoa.bean.InformationItem;
+import com.tryhard.myvoa.ui.fragment.ListOfArticleFragment;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -23,6 +24,7 @@ import rx.schedulers.Schedulers;
  * Created by Chen on 2015/10/28.
  */
 public class ParseHtmlString {
+    //数据变量
     private String sortOfInformation;
     public ArrayList<InformationItem> informationItems;
     public List<String> websites = new ArrayList<>();
@@ -34,7 +36,7 @@ public class ParseHtmlString {
     }
 
     //取InformationItems
-    public ArrayList<InformationItem> getNewInformationItems(String websiteWithOutHead){
+    public void getNewInformationItems(String websiteWithOutHead, final int getWhatType){
         informationItems = new ArrayList<>();
             RetrofitService.getHtmlObservable(websiteWithOutHead)
                     .subscribeOn(Schedulers.io())
@@ -43,10 +45,7 @@ public class ParseHtmlString {
                         public void call(Response response) {
                             try {
                                 OutputStream os = StreamTool.getOutputStream(response.getBody().in());
-                                String htmlString = os.toString();
-                                Document doc = Jsoup.parse(htmlString);
-                                informationItems = ParseHtmlString.this.getParseInformationItems(doc);
-
+                                informationItems = ParseHtmlString.this.getParseInformationItems(Jsoup.parse(os.toString()));
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -56,14 +55,64 @@ public class ParseHtmlString {
                     .subscribe(new Action1<Response>() {
                         @Override
                         public void call(Response response) {
-
+                            ListOfArticleFragment.saveInDao(null,informationItems,bitmap,getWhatType);
                         }
                     });
 
-            return informationItems;
         }
 
-       private ArrayList<InformationItem> getParseInformationItems(Document doc) {
+    //取更多的网址
+    public void getMoreWebsite(String websiteWithOutHead, final int getWhatType){
+        websites = new ArrayList<>();
+        RetrofitService.getHtmlObservable(websiteWithOutHead)
+                .subscribeOn(Schedulers.io())
+                .doOnNext(new Action1<Response>() {
+                    @Override
+                    public void call(Response response) {
+                        try {
+                            OutputStream os = StreamTool.getOutputStream(response.getBody().in());
+                            websites = ParseHtmlString.this.getWebsites(Jsoup.parse(os.toString()));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Response>() {
+                    @Override
+                    public void call(Response response) {
+                        ListOfArticleFragment.saveInDao(websites,null,bitmap,getWhatType);
+                    }
+                });
+    }
+
+    //取图片
+    public void getImage(String websiteWithOutHead, final int getWhatType){
+        RetrofitService.getHtmlObservable(websiteWithOutHead)
+                .subscribeOn(Schedulers.io())
+                .doOnNext(new Action1<Response>() {
+                    @Override
+                    public void call(Response response) {
+                        try {
+                            OutputStream os = StreamTool.getOutputStream(response.getBody().in());
+                            bitmap = ParseHtmlString.this.getBitmap(Jsoup.parse(os.toString()));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Response>() {
+                    @Override
+                    public void call(Response response) {
+                        ListOfArticleFragment.saveInDao(null,null,bitmap,getWhatType);
+                    }
+                });
+    }
+
+
+    //内部调用，将Document解析为ArrayList<InformationItem>
+    private ArrayList<InformationItem> getParseInformationItems(Document doc) {
             Element content = doc.getElementById("list");
             Elements contentlist = content.getElementsByTag("li");
             ArrayList<InformationItem> items = new ArrayList<InformationItem>();
@@ -83,26 +132,8 @@ public class ParseHtmlString {
             }
             return items;
         }
-    //取更多的网址
-    public List<String> getMoreWebsite(String websiteWithOutHead){
-        RetrofitService.getHtmlObservable(websiteWithOutHead)
-                .subscribeOn(Schedulers.io())
-               .subscribe(new Action1<Response>() {
-                   @Override
-                   public void call(Response response) {
-                       try {
-                           OutputStream os = StreamTool.getOutputStream(response.getBody().in());
-                           String htmlString = os.toString();
-                           Document doc = Jsoup.parse(htmlString);
-                           websites = ParseHtmlString.this.getWebsites(doc);
-                       } catch (IOException e) {
-                           e.printStackTrace();
-                       }
-                   }
-               });
-        return websites;
-    }
 
+    //内部调用，将Document解析出List<String> websites
     private List<String> getWebsites(Document doc){
         List<String> websites = new ArrayList<>();
         Element contentWeb = doc.getElementById("pagelist");
@@ -113,26 +144,8 @@ public class ParseHtmlString {
         return websites;
     }
 
-    //取图片
-    public Bitmap getImage(String websiteWithOutHead){
-        RetrofitService.getHtmlObservable(websiteWithOutHead)
-                .subscribeOn(Schedulers.io())
-                .subscribe(new Action1<Response>() {
-                    @Override
-                    public void call(Response response) {
-                        try {
-                            OutputStream os = StreamTool.getOutputStream(response.getBody().in());
-                            String htmlString = os.toString();
-                            Document doc = Jsoup.parse(htmlString);
-                            bitmap = ParseHtmlString.this.getBitmap(doc);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-        return bitmap;
-    }
 
+    //内部调用，将Document解析出网页图片bitmap
     private Bitmap getBitmap(Document doc) {
         Bitmap bitmap = null;
         Element content = doc.getElementById("content");
@@ -142,10 +155,8 @@ public class ParseHtmlString {
             return bitmap;
 
         String photoWebsite = images.get(0).attr("src");
-        URL url = null;
         try {
-            url = new URL(WEBSITE_HEAD + photoWebsite);
-            InputStream is = url.openStream();
+            InputStream is = (new URL(WEBSITE_HEAD + photoWebsite)).openStream();
             bitmap = BitmapFactory.decodeStream(is);
             is.close();
         } catch (MalformedURLException e) {

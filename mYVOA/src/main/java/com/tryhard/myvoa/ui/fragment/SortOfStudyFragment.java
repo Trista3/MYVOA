@@ -2,9 +2,7 @@ package com.tryhard.myvoa.ui.fragment;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import com.tryhard.myvoa.util.PreferencesManager;
 import com.tryhard.myvoa.R;
 import com.tryhard.myvoa.bean.Information;
 import com.tryhard.myvoa.ui.activity.MainActivity;
@@ -12,7 +10,6 @@ import com.tryhard.myvoa.ui.activity.MainActivity;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;

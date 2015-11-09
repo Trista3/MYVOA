@@ -3,7 +3,6 @@ package com.tryhard.myvoa.ui.fragment;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-
 import com.tryhard.myvoa.R;
 import com.tryhard.myvoa.bean.BrowsingItem;
 import com.tryhard.myvoa.bean.Information;
@@ -13,11 +12,9 @@ import com.tryhard.myvoa.ui.activity.ListOfArticleSimpleActivity;
 import com.tryhard.myvoa.util.ParseHtmlString;
 import com.tryhard.myvoa.widget.DividerItemDecoration;
 import com.tryhard.myvoa.widget.ListOfArticleFragAdapter;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NavUtils;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -27,9 +24,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-
-
 
 public class ListOfArticleFragment extends Fragment {
 	//常量
@@ -42,16 +36,15 @@ public class ListOfArticleFragment extends Fragment {
 	public static final int GET_IMAGE = 4;
 
 	//数据型变量
-	private ArrayList<InformationItem> mInformationItems = null;
-	private List<InformationItem> mInformationItems2 = null;
+	private static ArrayList<InformationItem> mInformationItems = null;
+	static List<InformationItem> mInformationItems2 = null;
 	private String innerWebsite; // 网址
-	private String mTableName;
 	private Information information;
 	private int lastVisibleItem;
-	private List<String> websites;
+	static List<String> websites;
 	private String mSortOfInformation;
-	private Bitmap clickItemBitmap = null;
-	private int clickPosition = -1;
+	private static Bitmap clickItemBitmap = null;
+	private static int clickPosition = -1;
 
 	//视图组件
 	private SwipeRefreshLayout mSwipeRefreshWidget;
@@ -59,21 +52,16 @@ public class ListOfArticleFragment extends Fragment {
 	private LinearLayoutManager mLayoutManager;
 
 	//逻辑对象
-	private ListOfArticleFragAdapter adapter;
+	public static ListOfArticleFragAdapter adapter;
 	private Context mContext;
-	private InformationItemDao mInformationItemDao;//数据库的管理
-	private Boolean isFirst = true;
-	private Handler firstHandler;
+	private static InformationItemDao mInformationItemDao;//数据库的管理
 	private int scanWebsiteNum = 0;
 	private ParseHtmlString parseHtmlString;
-
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		initLgObj();
-		mInformationItems = mInformationItemDao.getAllItemsByInfoSort(mSortOfInformation);
-
 	}
 
 	@Override
@@ -90,11 +78,10 @@ public class ListOfArticleFragment extends Fragment {
 
 		//首次启动页面，自动加载数据
 		if(mInformationItems.isEmpty()){
-			adapter = new ListOfArticleFragAdapter(mInformationItems);
 			getWhat(innerWebsite, initList);
 		}
 
-		//获取同一类型的网页的所有也输得网址
+		//获取同一类型的网页的所有页数的网址
 		getWhat(innerWebsite,getMoreWebsite);
 
 		//初始化fragment的视图
@@ -109,33 +96,35 @@ public class ListOfArticleFragment extends Fragment {
 
 		//为RecyclerView设置Adapter
 		mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+		mRecyclerView.setAdapter(adapter);
+		mRecyclerView.addItemDecoration(new DividerItemDecoration(mContext,DividerItemDecoration.VERTICAL_LIST));
 
 		//为RecyclerView中的项设置点击监听事件
 		adapter.setOnItemClickListener(new ListOfArticleFragAdapter.OnItemClickLitener() {
 			@Override
 			public void onItemClick(View view, int position) {
-				//点击过的条目字体变色
+				//将该Article的是否浏览状态设置为true，并保存起来
 				InformationItem item = mInformationItems.get(position);
-				TextView title = (TextView) view.findViewById(R.id.culture_titleView);
-				TextView date = (TextView) view.findViewById(R.id.culture_dateView);
-				title.setTextColor(getResources().getColor(R.color.c001));
-				date.setTextColor(getResources().getColor(R.color.c001));
-
+				item.setIsScaned(true);
+				mInformationItemDao.updateItem(item);
 				startActivity(ListOfArticleSimpleActivity.makeIntent(mContext, item));
 
+				//获取该Article网页的图片
 				clickPosition = position;
 				getWhat(item.getWebsite(),GET_IMAGE);
 			}
 		});
-		mRecyclerView.setAdapter(adapter);
+
 
 		//给SwipeRefreshLayout设置进度条颜色和监听器
 		mSwipeRefreshWidget.setColorSchemeResources(R.color.c5, R.color.c2,
 				R.color.c3, R.color.c4);
 		mSwipeRefreshWidget.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+			//设置下拉监听
 			@Override
 			public void onRefresh() {
 				getWhat(innerWebsite,initList);
+				mSwipeRefreshWidget.setRefreshing(false);
 			}
 		});
 
@@ -148,9 +137,8 @@ public class ListOfArticleFragment extends Fragment {
 					mSwipeRefreshWidget.setRefreshing(true);
 					if(scanWebsiteNum < websites.size()) {
 						getWhat(websites.get(++scanWebsiteNum),getMore);
-					}else{
-						mSwipeRefreshWidget.setRefreshing(false);
 					}
+					mSwipeRefreshWidget.setRefreshing(false);
 				}
 			}
 			@Override
@@ -162,41 +150,58 @@ public class ListOfArticleFragment extends Fragment {
 		mRecyclerView.setHasFixedSize(true);
 		mLayoutManager = new LinearLayoutManager(mContext);
 		mRecyclerView.setLayoutManager(mLayoutManager);
+		//设置分割线
 		if(!mInformationItems.isEmpty()) {
 			mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(),
 					DividerItemDecoration.VERTICAL_LIST));
 		}
 	}
 
+	//初始化逻辑对象
 	private void initLgObj() {
 		mContext = getActivity();
 		information = (Information) getActivity().getIntent().getSerializableExtra(ListOfArticleSimpleActivity.extra_data);
 		innerWebsite = information.getWebsite();
 		mSortOfInformation = information.getEtitle();
 
-		mTableName = innerWebsite.substring(innerWebsite.lastIndexOf("/") + 1, innerWebsite.lastIndexOf("."));
 		mInformationItemDao = new InformationItemDao(getActivity());
 		websites = new ArrayList<String>();
 		mInformationItems2 = new ArrayList<InformationItem>();
+		mInformationItems = mInformationItemDao.getAllItemsByInfoSort(mSortOfInformation);
+		adapter = new ListOfArticleFragAdapter(mInformationItems,mContext);
 		parseHtmlString = new ParseHtmlString(mSortOfInformation);
 	}
 
+	//获取对应要求类型的内容
 	private void getWhat(String website, int whatType){
-		if(whatType == initList){
-			parseHtmlString.getNewInformationItems(website);
-			mInformationItems = parseHtmlString.informationItems;
-			for(InformationItem item : parseHtmlString.informationItems){
-				if(item.getWebsite() == mInformationItems.get(0).getWebsite())
+		if(whatType == initList || whatType == getMore){
+			parseHtmlString.getNewInformationItems(website,whatType);
+		}else if(whatType == getMoreWebsite){
+			parseHtmlString.getMoreWebsite(website, whatType);
+		}else if(whatType == GET_IMAGE){
+			parseHtmlString.getImage(website,whatType);
+		}
+	}
+
+	//将异步返回的获取内容储存起来
+	public static void saveInDao(List<String> websites,ArrayList<InformationItem> items,Bitmap bitmap,int getWhatType){
+		if(getWhatType == initList) {
+			for (InformationItem item : items) {
+				if (!mInformationItems.isEmpty() && item.getWebsite() == mInformationItems.get(0).getWebsite())
 					break;
 				mInformationItemDao.add(item);
 			}
-		}else if(whatType == getMore){
-			parseHtmlString.getNewInformationItems(website);
-			mInformationItems.addAll(parseHtmlString.informationItems);
-		}else if(whatType == getMoreWebsite){
-			websites = parseHtmlString.getMoreWebsite(website);
-		}else if(whatType == GET_IMAGE){
-			clickItemBitmap = parseHtmlString.getImage(website);
+			mInformationItems = items;
+			adapter.updateInfoItemList(mInformationItems);
+			adapter.notifyDataSetChanged();
+		}else if(getWhatType == getMoreWebsite){
+			ListOfArticleFragment.websites = websites;
+		}else if(getWhatType == getMore){
+			mInformationItems.addAll(items);
+			adapter.updateInfoItemList(mInformationItems);
+			adapter.notifyDataSetChanged();
+		}else if(getWhatType == GET_IMAGE){
+			clickItemBitmap = bitmap;
 			InformationItem item = mInformationItems.get(clickPosition);
 			item.setIsScaned(true);
 			if (clickItemBitmap != null) {
@@ -207,15 +212,13 @@ public class ListOfArticleFragment extends Fragment {
 				item.setBitmapOs(null);
 			}
 			mInformationItemDao.updateItem(item);
+			adapter.notifyDataSetChanged();
 
 			//将浏览记录加到“离线”里面
 			BrowsingItem browsingItem = new BrowsingItem(item.getTitle(),item.getDate(),item.getWebsite(),item.getBitmapOs());
 			BrowsingHistoryFragment.mBrowsingItemDao.add(browsingItem);
 		}
-
-		adapter.notifyDataSetChanged();
 	}
-
 }
 
 

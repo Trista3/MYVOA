@@ -24,7 +24,7 @@ public class ListOfArticleFragAdapter extends RecyclerView.Adapter<ListOfArticle
     private static final int TYPE_ITEM = 0;
     private static final int TYPE_FOOTER = 1;
     private OnItemClickLitener mOnItemClickLitener;
-    private LayoutInflater mInflater;
+    private Context mContext;
     /**
      * ItemClick的回调接口
      */
@@ -38,14 +38,13 @@ public class ListOfArticleFragAdapter extends RecyclerView.Adapter<ListOfArticle
         this.mOnItemClickLitener = mOnItemClickLitener;
     }
 
-
     public ArrayList<InformationItem> getList() {
         return list;
     }
 
-    public ListOfArticleFragAdapter(ArrayList<InformationItem> mInformationItems) {
+    public ListOfArticleFragAdapter(ArrayList<InformationItem> mInformationItems,Context context) {
         this.list = mInformationItems;
-
+        mContext = context;
     }
 
     public void updateInfoItemList(ArrayList<InformationItem> mInformationItems){
@@ -73,7 +72,12 @@ public class ListOfArticleFragAdapter extends RecyclerView.Adapter<ListOfArticle
         if(getItemViewType(position) == TYPE_ITEM) {
             InformationItem informationItem = list.get(position);
             holder.titleView.setText(informationItem.getTitle());
-            holder.datewiew.setText(informationItem.getDate());
+            holder.dateView.setText(informationItem.getDate());
+            //若已浏览过，则改变字体颜色
+            if(informationItem.getIsScaned() == true){
+                holder.titleView.setTextColor(mContext.getResources().getColor(R.color.c001));
+                holder.dateView.setTextColor(mContext.getResources().getColor(R.color.c001));
+            }
             if(informationItem.getBitmapOs() != null)
                 holder.imageView.setImageBitmap(BitmapFactory.decodeByteArray(informationItem.getBitmapOs(), 0, informationItem.getBitmapOs().length, null));
             else{
@@ -112,29 +116,25 @@ public class ListOfArticleFragAdapter extends RecyclerView.Adapter<ListOfArticle
                     ViewGroup.LayoutParams.WRAP_CONTENT));
             return new FooterViewHolder(view);
         }
-
         return null;
     }
 
     class FooterViewHolder extends ItemViewHolder {
-
         public FooterViewHolder(View view) {
             super(view);
         }
-
     }
 
     class ItemViewHolder extends RecyclerView.ViewHolder {
-
         TextView titleView;
-        TextView datewiew;
+        TextView dateView;
         LinearLayout linearLayout;
         ImageView imageView;
 
         public ItemViewHolder(View view) {
             super(view);
             titleView = (TextView) view.findViewById(R.id.culture_titleView);
-            datewiew = (TextView) view.findViewById(R.id.culture_dateView);
+            dateView = (TextView) view.findViewById(R.id.culture_dateView);
             linearLayout = (LinearLayout) view.findViewById(R.id.listItemLinear);
             imageView = (ImageView) view.findViewById(R.id.photo);
         }

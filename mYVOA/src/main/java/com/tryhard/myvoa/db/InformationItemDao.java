@@ -41,7 +41,7 @@ public class InformationItemDao {
         }
     }
     public List<InformationItem> queryByWebsite(String website){
-        List<InformationItem> list = null;
+        List<InformationItem> list = new ArrayList<>();
         try {
              list =  infoItemDaoOpe.queryBuilder().where()
                     .eq(InformationItem.WEBSITE_FIELD_NAME, website)
