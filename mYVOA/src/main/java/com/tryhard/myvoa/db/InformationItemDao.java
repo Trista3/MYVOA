@@ -5,7 +5,6 @@ import android.content.Context;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.UpdateBuilder;
 import com.tryhard.myvoa.bean.InformationItem;
-import com.tryhard.myvoa.ui.activity.MainActivity;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -55,7 +54,7 @@ public class InformationItemDao {
     public ArrayList<InformationItem> getAllItemsByInfoSort(String SortOfInfomation){
         ArrayList<InformationItem> list = new ArrayList<>();
         try {
-            List temp = infoItemDaoOpe.queryBuilder().where()
+            List temp = infoItemDaoOpe.queryBuilder().orderBy(InformationItem.DATE,false).where()
                     .eq(InformationItem.SORT_FIELD_NAME, SortOfInfomation)
                     .query();
             if(temp != null)

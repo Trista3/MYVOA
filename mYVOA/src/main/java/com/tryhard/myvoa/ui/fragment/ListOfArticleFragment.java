@@ -9,9 +9,10 @@ import com.tryhard.myvoa.bean.Information;
 import com.tryhard.myvoa.bean.InformationItem;
 import com.tryhard.myvoa.db.InformationItemDao;
 import com.tryhard.myvoa.ui.activity.ListOfArticleSimpleActivity;
+import com.tryhard.myvoa.util.NetworkUtil;
 import com.tryhard.myvoa.util.ParseHtmlString;
 import com.tryhard.myvoa.widget.DividerItemDecoration;
-import com.tryhard.myvoa.widget.ListOfArticleFragAdapter;
+import com.tryhard.myvoa.ui.adapter.ListOfArticleFragAdapter;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -27,8 +28,6 @@ import android.view.ViewGroup;
 
 public class ListOfArticleFragment extends Fragment {
 	//常量
-	private static final String TAG = "ListOfArticleFragment";
-	public static final String INNER_WEBSITE = "website";
 	public static final String WEBSITE_HEAD = "http://www.51voa.com";
 	public static final int getMoreWebsite = 2;
 	public static final int initList = 1;
@@ -42,7 +41,7 @@ public class ListOfArticleFragment extends Fragment {
 	private Information information;
 	private int lastVisibleItem;
 	static List<String> websites;
-	private String mSortOfInformation;
+	private static String mSortOfInformation;
 	private static Bitmap clickItemBitmap = null;
 	private static int clickPosition = -1;
 
@@ -82,7 +81,7 @@ public class ListOfArticleFragment extends Fragment {
 		}
 
 		//获取同一类型的网页的所有页数的网址
-		getWhat(innerWebsite,getMoreWebsite);
+		getWhat(innerWebsite, getMoreWebsite);
 
 		//初始化fragment的视图
 		initView(v);
@@ -165,8 +164,8 @@ public class ListOfArticleFragment extends Fragment {
 		mSortOfInformation = information.getEtitle();
 
 		mInformationItemDao = new InformationItemDao(getActivity());
-		websites = new ArrayList<String>();
-		mInformationItems2 = new ArrayList<InformationItem>();
+		websites = new ArrayList<>();
+		mInformationItems2 = new ArrayList<>();
 		mInformationItems = mInformationItemDao.getAllItemsByInfoSort(mSortOfInformation);
 		adapter = new ListOfArticleFragAdapter(mInformationItems,mContext);
 		parseHtmlString = new ParseHtmlString(mSortOfInformation);
@@ -174,12 +173,16 @@ public class ListOfArticleFragment extends Fragment {
 
 	//获取对应要求类型的内容
 	private void getWhat(String website, int whatType){
-		if(whatType == initList || whatType == getMore){
-			parseHtmlString.getNewInformationItems(website,whatType);
-		}else if(whatType == getMoreWebsite){
-			parseHtmlString.getMoreWebsite(website, whatType);
-		}else if(whatType == GET_IMAGE){
-			parseHtmlString.getImage(website,whatType);
+		if(NetworkUtil.getInstance(mContext).checkNetworkState()){
+			if(whatType == initList || whatType == getMore){
+				parseHtmlString.getNewInformationItems(website, whatType);
+			}else if(whatType == getMoreWebsite){
+				parseHtmlString.getMoreWebsite(website, whatType);
+			}else if(whatType == GET_IMAGE){
+				parseHtmlString.getImage(website,whatType);
+			}
+		}else{
+			NetworkUtil.getInstance(mContext).checkNetworkState();
 		}
 	}
 
@@ -191,7 +194,7 @@ public class ListOfArticleFragment extends Fragment {
 					break;
 				mInformationItemDao.add(item);
 			}
-			mInformationItems = items;
+			mInformationItems = mInformationItemDao.getAllItemsByInfoSort(mSortOfInformation);
 			adapter.updateInfoItemList(mInformationItems);
 			adapter.notifyDataSetChanged();
 		}else if(getWhatType == getMoreWebsite){

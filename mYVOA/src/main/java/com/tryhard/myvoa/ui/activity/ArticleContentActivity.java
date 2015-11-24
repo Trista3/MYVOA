@@ -2,15 +2,10 @@ package com.tryhard.myvoa.ui.activity;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 import android.annotation.TargetApi;
 import android.app.Service;
@@ -18,34 +13,26 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.media.MediaPlayer;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.NavUtils;
 
-
-import android.support.v7.internal.view.menu.MenuPopupHelper;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 import com.tryhard.myvoa.bean.InformationItem;
 import com.tryhard.myvoa.ui.activity.base.BaseActivity;
 import com.tryhard.myvoa.ui.fragment.ListOfArticleFragment;
 import com.tryhard.myvoa.R;
-import com.tryhard.myvoa.util.ArticleVideoPlayService;
-import com.tryhard.myvoa.util.RetrofitService;
+import com.tryhard.myvoa.service.ArticleVideoPlayService;
+import com.tryhard.myvoa.util.MvoaRetrofit;
+import com.tryhard.myvoa.util.NetworkUtil;
 import com.tryhard.myvoa.util.StreamTool;
 
 import retrofit.client.Response;
@@ -56,10 +43,11 @@ import rx.schedulers.Schedulers;
 public class ArticleContentActivity extends BaseActivity {
     // 常量
     public static String content_extra_data="ArticleContentActivity.extra_data";
+    public final static String NO_MP3 = "nomp3";
 
     // 数据型变量
     private String mTextWebsite;
-    private String mp3UriString = "noMP3";
+    private String mp3UriString = NO_MP3;
     private InformationItem informationItem;
     String articalText;
 
@@ -70,8 +58,6 @@ public class ArticleContentActivity extends BaseActivity {
     private TextView playAudioBtn; // 播放按钮
 
     // 逻辑对象
-    private Context appContext;
-    private MediaPlayer audioPlayer;
     boolean isPlay = false;
     ArticleVideoPlayService.MyBinder binder;
     private ServiceConnection conn = new ServiceConnection() {
@@ -86,6 +72,7 @@ public class ArticleContentActivity extends BaseActivity {
         }
     };
 
+    //***********************************************
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,8 +83,8 @@ public class ArticleContentActivity extends BaseActivity {
 
         initTitleView();
         initViews();
-        uriDataRequest();
-        initLgObjs();
+        if(NetworkUtil.getInstance(mContext).checkNetworkState())
+            uriDataRequest();
     }
 
     //初始化标题栏
@@ -110,7 +97,7 @@ public class ArticleContentActivity extends BaseActivity {
 
     //取得Mp3的播放网址
     private void uriDataRequest(){
-        RetrofitService.getHtmlObservable(mTextWebsite)
+        MvoaRetrofit.getHtmlObservable(mTextWebsite)
                 .subscribeOn(Schedulers.io())
                 .doOnNext(new Action1<Response>() {
                     @Override
@@ -133,18 +120,14 @@ public class ArticleContentActivity extends BaseActivity {
                     @Override
                     public void call(Response response) {
                         articalWV.loadDataWithBaseURL(ListOfArticleFragment.WEBSITE_HEAD, articalText, "text/html", "utf-8", null);
-                        if (!mp3UriString.equals("noMP3")) {
+                        if (!mp3UriString.equals(NO_MP3)) {
                             mLinearLayout.setVisibility(View.VISIBLE);
                             playAudioBtn.setEnabled(true);
 
                             HashMap<String,String> extra = new HashMap<>();
-                            extra.put("mp3UriString",mp3UriString);
-                            Intent intent = new Intent();
-                            intent.setClass(ArticleContentActivity.this, ArticleVideoPlayService.class);
-                            intent.putExtra(ArticleVideoPlayService.SERVICE_EXTRA,extra);
-                            bindService(intent, conn, Service.BIND_AUTO_CREATE);
+                            extra.put(ArticleVideoPlayService.EXTRA_STRING,mp3UriString);
+                            bindService(makeIntent(mContext,ArticleVideoPlayService.class,extra), conn, Service.BIND_AUTO_CREATE);
                         } else {
-                            // mLinearLayout.setVisibility(View.VISIBLE);
                             mLinearLayout.setVisibility(View.GONE);
                         }
                     }
@@ -172,21 +155,10 @@ public class ArticleContentActivity extends BaseActivity {
         playAudioBtn.setOnClickListener(clickListener);
     }
 
-    /**
-     * 初始化逻辑对象
-     */
-    private void initLgObjs() {
-        appContext = this;
-    }
 
     @Override
     protected void onDestroy() {
-        if(null != audioPlayer){
-            audioPlayer.stop(); // 停止播放音乐
-            audioPlayer.release();
-            audioPlayer = null; // 将此对象置为null
-        }
-        if(mp3UriString != null)
+        if(!mp3UriString.equals(NO_MP3))
             unbindService(conn);
         super.onDestroy();
     }
@@ -214,4 +186,8 @@ public class ArticleContentActivity extends BaseActivity {
             }
        }
     };
+
+    public static Intent makeIntent(Context mFromContext,Class toStartClass,HashMap extra ){
+        return new Intent(mFromContext,toStartClass).putExtra(ArticleVideoPlayService.SERVICE_EXTRA, extra);
+    }
 }

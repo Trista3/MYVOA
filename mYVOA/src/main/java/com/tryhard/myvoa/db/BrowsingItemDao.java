@@ -14,12 +14,10 @@ import java.util.List;
  * Created by Chen on 2015/10/22.
  */
 public class BrowsingItemDao {
-    private Context context;
     private Dao<BrowsingItem, Integer> browsingItemDaoOpe;
     private DatabaseHelper helper;
 
     public BrowsingItemDao(Context context){
-        this.context = context;
         helper = DatabaseHelper.getHelper(context);
         try {
             browsingItemDaoOpe = helper.getDao(BrowsingItem.class);
@@ -54,7 +52,8 @@ public class BrowsingItemDao {
     public List<BrowsingItem> getAllItems(){
         List<BrowsingItem> list = null;
         try {
-            list = browsingItemDaoOpe.queryForAll();
+            list = browsingItemDaoOpe.queryBuilder().orderBy("id",false).query();
+          //  list = browsingItemDaoOpe.queryForAll();
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (NullPointerException e){

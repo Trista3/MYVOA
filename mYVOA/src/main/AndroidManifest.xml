@@ -36,7 +36,7 @@
             android:name=".ui.activity.base.BaseActivity"
             android:label="@string/title_activity_base" >
         </activity>
-        <service android:name=".util.ArticleVideoPlayService"></service>
+        <service android:name=".service.ArticleVideoPlayService"></service>
     </application>
     <uses-sdk
         android:minSdkVersion="13"
@@ -44,8 +44,12 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <android:uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <android:uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <android:uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+
 
 </manifest>

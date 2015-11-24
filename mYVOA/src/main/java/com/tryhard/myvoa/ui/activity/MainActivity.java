@@ -18,15 +18,13 @@ import android.support.v4.view.ViewPager;
 
 
 public class MainActivity extends BaseActivity {
-    //常量
-    public static final String INNER_WEBSITE = "website";
-
     //视图组件
-    private ViewPager mViewPager;
+    private static ViewPager mViewPager;
     SmartTabLayout viewPagerTab;
 
-
-    @Override
+    //控制下划线当前位置变量
+    public static int currentPosition = 0;
+   @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -45,10 +43,14 @@ public class MainActivity extends BaseActivity {
                 .create());
 
         mViewPager.setAdapter(adapter);
-        mViewPager.setCurrentItem(0);
+        mViewPager.setCurrentItem(currentPosition);
         viewPagerTab = (SmartTabLayout) findViewById(R.id.viewpagertab);
 
         viewPagerTab.setViewPager(mViewPager);
+    }
+
+    public static void setTabCurrentPosition(int position){
+        currentPosition = position;
     }
 
     public static Intent makeIntent(Context mContext, Information info){

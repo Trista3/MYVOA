@@ -10,6 +10,8 @@ import com.j256.ormlite.table.DatabaseTable;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @DatabaseTable(tableName = "InformationItem")
 public class InformationItem implements Serializable {
@@ -18,6 +20,7 @@ public class InformationItem implements Serializable {
 	public static final String BITMAPOS_FIELD_NAME = "bitmapos_column";
 	public static final String ISSCANED_FIELD_NAME = "isscaned_column";
 	public static final String SORT_FIELD_NAME = "from_sort_of_information";
+	public static final String DATE = "date";
 
 	@DatabaseField(generatedId = true)
 	private int id;
@@ -34,7 +37,16 @@ public class InformationItem implements Serializable {
 	@DatabaseField(defaultValue = "false", columnName = ISSCANED_FIELD_NAME)
 	Boolean isScaned = false;
 
-	//private Integer mId;
+	public Date getDateTime() {
+		return dateTime;
+	}
+
+	public void setDateTime(Date dateTime) {
+		this.dateTime = dateTime;
+	}
+
+	@DatabaseField(columnName = DATE)
+	Date dateTime;
 
 	public Boolean getIsScaned() {
 		return isScaned;

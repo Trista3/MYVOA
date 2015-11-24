@@ -22,11 +22,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class SortOfCultureFragment extends ListFragment {
-	//常量
-	private static final String TAG = "SortOfCultureFragment"; //用于日志输出中识别自己
-	private final static String WEBSITE_HEAD = "http://www.51voa.com"; //网址的首部
-
-	//标志型变量
 
 	//视图组件
 	private ListView view;
@@ -103,8 +98,6 @@ public class SortOfCultureFragment extends ListFragment {
 			TextView Ctitle = (TextView)convertView.findViewById(R.id.Ctitle);
 			Ctitle.setText(info.getCtitle());
 
-			Resources res = getResources();
-
 			DrawView drawView = (DrawView)convertView.findViewById(R.id.drawView);
 			drawView.setColor(color[position % 14]);
 
@@ -116,6 +109,7 @@ public class SortOfCultureFragment extends ListFragment {
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Information info = mInformations.get(position);
+		MainActivity.setTabCurrentPosition(1);
 		startActivity(MainActivity.makeIntent(mContext, info));
 	}
 }

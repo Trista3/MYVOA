@@ -109,8 +109,8 @@ public class SortOfStudyFragment extends ListFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-
         Information info = mInformations.get(position);
+        MainActivity.setTabCurrentPosition(0);
         startActivity(MainActivity.makeIntent(mContext, info));
     }
 

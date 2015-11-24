@@ -13,6 +13,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import retrofit.client.Response;
@@ -38,7 +40,7 @@ public class ParseHtmlString {
     //取InformationItems
     public void getNewInformationItems(String websiteWithOutHead, final int getWhatType){
         informationItems = new ArrayList<>();
-            RetrofitService.getHtmlObservable(websiteWithOutHead)
+            MvoaRetrofit.getHtmlObservable(websiteWithOutHead)
                     .subscribeOn(Schedulers.io())
                     .doOnNext(new Action1<Response>() {
                         @Override
@@ -64,7 +66,7 @@ public class ParseHtmlString {
     //取更多的网址
     public void getMoreWebsite(String websiteWithOutHead, final int getWhatType){
         websites = new ArrayList<>();
-        RetrofitService.getHtmlObservable(websiteWithOutHead)
+        MvoaRetrofit.getHtmlObservable(websiteWithOutHead)
                 .subscribeOn(Schedulers.io())
                 .doOnNext(new Action1<Response>() {
                     @Override
@@ -88,7 +90,7 @@ public class ParseHtmlString {
 
     //取图片
     public void getImage(String websiteWithOutHead, final int getWhatType){
-        RetrofitService.getHtmlObservable(websiteWithOutHead)
+        MvoaRetrofit.getHtmlObservable(websiteWithOutHead)
                 .subscribeOn(Schedulers.io())
                 .doOnNext(new Action1<Response>() {
                     @Override
@@ -115,7 +117,7 @@ public class ParseHtmlString {
     private ArrayList<InformationItem> getParseInformationItems(Document doc) {
             Element content = doc.getElementById("list");
             Elements contentlist = content.getElementsByTag("li");
-            ArrayList<InformationItem> items = new ArrayList<InformationItem>();
+            ArrayList<InformationItem> items = new ArrayList<>();
 
             //开始解析
             for (org.jsoup.nodes.Element j : contentlist) {
@@ -123,7 +125,13 @@ public class ParseHtmlString {
 
                 Elements i = j.getElementsByTag("a");
                 String text = j.text();
-                infoItem.setDate(text.substring(text.lastIndexOf("(") + 1, text.lastIndexOf(")")));
+                String dateString = text.substring(text.lastIndexOf("(") + 1, text.lastIndexOf(")"));
+                try {
+                    infoItem.setDateTime(new SimpleDateFormat("yy-MM-dd").parse(dateString));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                infoItem.setDate(dateString);
                 infoItem.setTitle(text.substring(0, text.lastIndexOf("(")));
                 infoItem.setWebsite(i.attr("href"));
                 infoItem.setmFromSortOfInformation(sortOfInformation);
